@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  receive_csv
+
+  Sample SAM Template for receive_csv
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 20
+
+Resources:
+  ReceiveCSVFunc:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: recvCSVfolder/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      # Events:
+      #   HelloWorld:
+      #     Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+      #     Properties:
+      #       Path: /hello
+      #       Method: get
+      # Role: arn:aws:iam::549219412834:role/LambdaS3FullAcc
+      Policies:
+        - AmazonSQSFullAccess
+        - AmazonS3FullAccess
+        - CloudWatchFullAccess
+        - CloudWatchLogsFullAccess
+      Layers:
+        # - arn:aws:lambda:ap-southeast-2:770693421928:layer:Klayers-p39-numpy:5
+        - arn:aws:lambda:ap-southeast-2:336392948345:layer:AWSDataWrangler-Python39:7
+      Events:
+        CreateEvent:
+          Type: S3
+          Properties:
+            Bucket: !Ref SrcBucket
+            # Bucket: rawdata-thong
+            Events: s3:ObjectCreated:*
+        # SQSQueueEvent:
+        #   Type: SQS
+        #   Properties:
+        #     Queue: !GetAtt SimpleQueue.Arn
+            # BatchSize: 10
+  SrcBucket:
+    Type: AWS::S3::Bucket
+
+  # SimpleQueue:
+  #   Type: AWS::SQS::Queue
+  #   Properties:
+  #     FifoQueue: True
